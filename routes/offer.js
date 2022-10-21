@@ -57,8 +57,6 @@ router.post(
       //   console.log(pictureConverted);
 
       // envoye de l'image sur cloudinary dans un dossier Vinted
-      //   if (req.files?.picture) {
-      // }
       const result = await cloudinary.uploader.upload(pictureConverted, {
         folder: "/Vinted/offers/" + newOffer.owner._id,
       });
