@@ -15,9 +15,9 @@ app.use(cors());
 mongoose.connect(process.env.MONGODB_URI);
 
 cloudinary.config({
-  cloud_name: "dvfsuflfr",
-  api_key: "113321942278513",
-  api_secret: "5x2d4J7CFPXwJkAHE9nQx68U6M0",
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
   secure: true,
 });
 
@@ -27,6 +27,10 @@ const offerRoutes = require("./routes/offer");
 
 app.use(userRoutes);
 app.use(offerRoutes);
+
+app.get("/", (req, res) => {
+  res.json({ message: "Welcome to my project hello 🚀🚀🚀🚀🚀🚀" });
+});
 
 app.all("*", (req, res) => {
   res.status(400).json({ message: "Cannot find this URL..." });
