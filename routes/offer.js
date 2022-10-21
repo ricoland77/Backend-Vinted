@@ -75,84 +75,68 @@ router.post(
 // recherche dans les ANNONCES
 router.get("/offers", async (req, res) => {
   try {
-    const { title, priceMin, priceMax, sort, page, skip } = req.query;
+    const { title, priceMin, priceMax, sort, page } = req.query;
 
     const filters = {};
-    const regExp = new RegExp(req.query.title, "i");
-    // console.log(filters);
-
     if (title) {
-      filters.product_name = regExp;
+      filters.product_name = new RegExp(title, "i");
     }
 
     if (priceMin) {
-      filters.product_price = {
-        $gte: req.query.priceMin,
-      };
+      filters.product_price = { $gte: Number(priceMin) };
     }
 
+    // console.log(filters);
     if (priceMax) {
-      filters.product_price = {
-        $lte: req.query.priceMax,
-      };
+      if (!filters.product_price) {
+        filters.product_price = { $lte: Number(priceMax) };
+      } else {
+        filters.product_price.$lte = Number(priceMax);
+      }
     }
-    // !!! WARNING !!! => filtre sort ne fonctionne pas !!!
+    // console.log(filters);
 
-    // let sortValue = 0;
-    // if (sort === "price-desc") {
-    //   sortValue = -1;
-    // }
-    // if (sort === "price-asc") {
-    //   sortValue = 1;
-    // }
-
-    // if (sort) {
-    //   filters.sort = req.query.sort;
-    // }
-
-    if (sort) {
-      filters.product_price = req.query.sort;
+    const sortFilter = {};
+    if (sort === "price-desc") {
+      sortFilter.product_price = "desc";
+    } else if (sort === "price-asc") {
+      sortFilter.product_price = "asc";
     }
 
+    // 5 resultats par page : 1 skip 0, 2 skip 5, 3 skip 10, 4 skip 15
+    // 3 resultats par page : 1 skip 0, 2 skip 3, 3 skip 6, 4 skip 9
+    const limit = 5;
+    let pageRequired = 1;
     if (page) {
-      filters.page = req.query.page;
+      pageRequired = Number(page);
     }
 
-    if (skip) {
-      filters.skip = req.query.skip;
-    }
+    const skip = (pageRequired - 1) * limit;
 
-    const result = await Offer.find(filters)
-      // .sort(req.query.sort)
-      .limit(req.query.page)
-      .skip(req.query.skip)
-      .select("product_name product_price");
+    const offers = await Offer.find(filters)
+      .sort(sortFilter)
+      .skip(skip)
+      .limit(limit)
+      // .select("product_name product_price owner")
+      .populate("owner", "account _id");
 
-    console.log(result);
+    const offerCount = await Offer.countDocuments(filters);
+    console.log(offerCount);
 
-    /*
-    const result = await Offer.find({
-      // product_name: regExp,
-      product_price: { $gte: req.query.priceMin, $lte: req.query.priceMax },
-    })
-      .sort({ product_price: req.query.sort })
-      .skip(req.query.skip)
-      .limit(req.query.page)
-      .select("product_price product_name product_details product_image");*/
-    res.status(200).json(result);
+    res.json({ count: offerCount, offers: offers });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 });
 
-// route OFFER => récupère les détails d'une annonce, en fonction de son id
 router.get("/offer/:id", async (req, res) => {
   try {
-    const detailOffer = await Offer.findById(req.params.id)
-      .populate("owner", "account _id")
-      .select("-product_name -_id -product_description");
-    // console.log(detailOffer);
-    res.status(200).json(detailOffer);
+    console.log(req.params);
+    const offer = await Offer.findById(req.params.id).populate(
+      "owner",
+      "account _id"
+    );
+    res.json(offer);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
