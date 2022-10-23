@@ -1,6 +1,7 @@
 const express = require("express"); // import package express
 const router = express.Router(); // création du router express
 const fileUpload = require("express-fileupload"); // Import du package express-fileupload, gère la récupérations de fichiers
+router.use(express.urlencoded({ extended: true }));
 
 const User = require("../models/User"); // import de mon modèle User
 const Offer = require("../models/Offer"); // import de mon modèle Offer
@@ -30,8 +31,9 @@ router.post(
       TAILLE,
       COULEUR,
     } = req.body; // destructuring
-    const picture = req.files;
-    // console.log(picture);
+    const image = req.files;
+    const pictures = req.files;
+    // console.log(image);
 
     try {
       const newOffer = new Offer({
@@ -48,23 +50,51 @@ router.post(
         owner: req.user,
       });
 
+      // Image principale
+      if (!image) {
+        return res.status(400).json({ message: "Select image and upload" });
+      }
       // transformer le buffer de mon img
       const convertToBase64 = (file) => {
         return `data:${file.mimetype};base64,${file.data.toString("base64")}`;
       };
       //conversion de l'image reçu => en base64
-      const pictureConverted = convertToBase64(req.files.picture);
-      //   console.log(pictureConverted);
+      const imageConverted = convertToBase64(req.files.image);
+      //   console.log(imageConverted);
 
       // envoye de l'image sur cloudinary dans un dossier Vinted
-      const result = await cloudinary.uploader.upload(pictureConverted, {
+      const result = await cloudinary.uploader.upload(imageConverted, {
         folder: "/Vinted/offers/" + newOffer.owner._id,
       });
       // ajout de l'image dans l'annonce
       newOffer.product_image = result;
 
+      // pictures secondaires
+      const tab = [];
+      for (let i = 0; i < pictures.length; i++) {
+        if (pictures) {
+          // transformer le buffer de mon img
+          const convertToBase64 = (file) => {
+            return `data:${file.mimetype};base64,${file.data.toString(
+              "base64"
+            )}`;
+          };
+          //conversion de l'image reçu => en base64
+          const picturesConverted = convertToBase64(req.files.pictures);
+
+          // envoye de l'image sur cloudinary dans un dossier Vinted
+          const result = await cloudinary.uploader.upload(picturesConverted, {
+            folder: "/Vinted/offers/" + newOffer.owner._id,
+          });
+        }
+      }
+      tab.push(result);
+      // ajout de l'image dans l'annonce
+      newOffer.product_pictures = result;
+
       // sauvegarder
-      await newOffer.save();
+      // await newOffer.save();
+
       res.status(200).json(newOffer);
     } catch (error) {
       res.status(400).json({ message: error.message });
