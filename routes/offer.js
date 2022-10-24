@@ -60,7 +60,6 @@ router.post(
       };
       //conversion de l'image reçu => en base64
       const imageConverted = convertToBase64(req.files.image);
-      //   console.log(imageConverted);
 
       // envoye de l'image sur cloudinary dans un dossier Vinted
       const result = await cloudinary.uploader.upload(imageConverted, {
@@ -71,26 +70,27 @@ router.post(
 
       // pictures secondaires
       const tab = [];
-      for (let i = 0; i < pictures.length; i++) {
-        if (pictures) {
-          // transformer le buffer de mon img
-          const convertToBase64 = (file) => {
-            return `data:${file.mimetype};base64,${file.data.toString(
-              "base64"
-            )}`;
-          };
+
+      console.log("ok");
+      if (pictures) {
+        console.log("ok1");
+        for (let i = 0; i < pictures.length; i++) {
+          console.log("ok2");
+          const picture = pictures[i];
           //conversion de l'image reçu => en base64
-          const picturesConverted = convertToBase64(req.files.pictures);
+          const pictureConverted = convertToBase64(pictures);
 
           // envoye de l'image sur cloudinary dans un dossier Vinted
-          const result = await cloudinary.uploader.upload(picturesConverted, {
+          const result = await cloudinary.uploader.upload(pictureConverted, {
             folder: "/Vinted/offers/" + newOffer.owner._id,
           });
+          tab.push(result);
+          console.log(result);
         }
       }
-      tab.push(result);
       // ajout de l'image dans l'annonce
-      newOffer.product_pictures = result;
+      newOffer.product_pictures = tab;
+      console.log("ok3");
 
       // sauvegarder
       // await newOffer.save();
