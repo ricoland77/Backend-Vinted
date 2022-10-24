@@ -86,7 +86,7 @@ router.post(
       newOffer.product_pictures = tab;
 
       // sauvegarder
-      // await newOffer.save(); // Oublie pas décommenter quand c'est good
+      await newOffer.save(); // Oublie pas décommenter quand c'est good
 
       res.status(200).json(newOffer);
     } catch (error) {
@@ -94,115 +94,6 @@ router.post(
     }
   }
 );
-
-// router.post(
-//   "/offer/publish",
-//   isAuthenticated,
-//   fileUpload(),
-//   async (req, res) => {
-//     //   console.log("ok");
-//     const {
-//       title,
-//       description,
-//       price,
-//       condition,
-//       EMPLACEMENT,
-//       MARQUE,
-//       TAILLE,
-//       COULEUR,
-//     } = req.body; // destructuring
-//     const image = req.files;
-//     const pictures = req.files;
-//     // console.log(image);
-
-//     try {
-//       const newOffer = new Offer({
-//         product_name: title,
-//         product_description: description,
-//         product_price: price,
-//         product_details: [
-//           { MARQUE: MARQUE },
-//           { TAILLE: TAILLE },
-//           { condition: condition },
-//           { COULEUR: COULEUR },
-//           { EMPLACEMENT: EMPLACEMENT },
-//         ],
-//         owner: req.user,
-//       });
-
-//       // Image principale
-//       if (!image) {
-//         return res.status(400).json({ message: "Select image and upload" });
-//       }
-//       // transformer le buffer de mon img
-//       const convertToBase64 = (file) => {
-//         return `data:${file.mimetype};base64,${file.data.toString("base64")}`;
-//       };
-//       //conversion de l'image reçu => en base64
-//       const imageConverted = convertToBase64(req.files.image);
-
-//       // envoye de l'image sur cloudinary dans un dossier Vinted
-//       const result = await cloudinary.uploader.upload(imageConverted, {
-//         folder: "/Vinted/offers/" + newOffer.owner._id,
-//       });
-//       // ajout de l'image dans l'annonce
-//       newOffer.product_image = result;
-
-//       // pictures secondaires
-//       if (pictures) {
-//         const tab = [];
-
-//         for (let i = 0; i < pictures.length; i++) {
-//           const picture = picture[i];
-//           // transformer le buffer de mon img
-//           const convertToBase64 = (file) => {
-//             return `data:${file.mimetype};base64,${file.data.toString(
-//               "base64"
-//             )}`;
-//           };
-//           //conversion de l'image reçu => en base64
-//           const pictureConverted = convertToBase64(req.files.pictures);
-
-//           // envoye de l'image sur cloudinary dans un dossier Vinted
-//           const result = await cloudinary.uploader.upload(pictureConverted, {
-//             folder: "/Vinted/offers/" + newOffer.owner._id,
-//           });
-//           console.log(result);
-
-//           // ajout de l'image dans l'annonce
-//           newOffer.product_image = result;
-//         }
-//         tab.push(result);
-//       }
-
-//       /*
-//       const tab = [];
-//       if (pictures) {
-//         for (let i = 0; i < pictures.length; i++) {
-//           //conversion de l'image reçu => en base64
-//           const picturesConverted = convertToBase64(pictures);
-//           console.log(picturesConverted);
-
-//           // envoye de l'image sur cloudinary dans un dossier Vinted
-//           const result = await cloudinary.uploader.upload(picturesConverted, {
-//             folder: "/Vinted/offers/" + newOffer.owner._id,
-//           });
-//           tab.push(result);
-//         }
-//       }
-//       // ajout de l'image dans l'annonce
-//       newOffer.product_pictures = tab;
-//       console.log(tab);
-
-//       // sauvegarder
-//       // await newOffer.save();*/
-
-//       res.status(200).json(newOffer);
-//     } catch (error) {
-//       res.status(400).json({ message: error.message });
-//     }
-//   }
-// );
 
 // recherche dans les ANNONCES
 router.get("/offers", async (req, res) => {
