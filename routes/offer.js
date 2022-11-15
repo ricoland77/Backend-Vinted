@@ -128,7 +128,7 @@ router.get("/offers", async (req, res) => {
 
     // 5 resultats par page : 1 skip 0, 2 skip 5, 3 skip 10, 4 skip 15
     // 3 resultats par page : 1 skip 0, 2 skip 3, 3 skip 6, 4 skip 9
-    const limit = 5;
+    const limit = 10;
     let pageRequired = 1;
     if (page) {
       pageRequired = Number(page);
