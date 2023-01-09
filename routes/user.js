@@ -40,8 +40,9 @@ router.post("/user/signup", async (req, res) => {
       salt: salt,
     });
     await newUser.save(); // sauvegarde de newUser dans la BDD
-
-    res.status(200).json({ message: "Your account has been created" });
+    res
+      .status(200)
+      .json({ message: "Your account has been created", token: newUser.token });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
